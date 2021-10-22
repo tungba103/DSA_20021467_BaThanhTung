@@ -10,10 +10,10 @@ public:
     Node() {
     }
     Node(int data) {
-        this.data = data;
+        this->data = data;
     }
     Node (int data, Node* father) {
-        this.data = data;
+        this->data = data;
         this->fatherNode = father;
     }
     friend class Tree;
@@ -25,16 +25,17 @@ private:
     int count;
 public:
     Tree() {
+    	root = NULL;
     }
 
     // Find a node with value data and return 
     Node* findNode( Node* root, int data) {
-        if( root == NULL) return nullptr;
-        if( root.data == data) return root;
+        if( root == NULL) return NULL;
+        if( root->data == data) return root;
         else {
             Node* loopTemp = root->firstChild;
             while(loopTemp) {
-                if (loopTemp.data == data) return loopTemp;
+                if (loopTemp->data == data) return loopTemp;
                 if (loopTemp->firstChild != NULL) {
                     Node* newNode = findNode(loopTemp->firstChild,data);
                     if( newNode != NULL) return newNode;
@@ -45,11 +46,11 @@ public:
     }
 
     // Insert a Node with value data into a linkedlist
-    void insertToSortedLinkedList (node* head, int data) {
+    void insertToSortedLinkedList (Node* head, int data) {
         if(!head) head = new Node(data);
         Node* newNode = new Node(data);
         Node* loopTemp = head;
-            while (loopTemp->nextSibling.data < data) loopTemp = loopTemp->nextSibling;
+            while (loopTemp->nextSibling != NULL && loopTemp->nextSibling->data < data) loopTemp = loopTemp->nextSibling;
             Node * temp = loopTemp;
             newNode->nextSibling = loopTemp->nextSibling;
             temp->nextSibling = newNode;
@@ -57,7 +58,7 @@ public:
 
     // Insert a Node with fatherNode and value data
     bool insert(int father, int data) {
-        if (this->root && father == 0) {
+        if (!this->root && father == 0) {
             this->root = new Node(data);
             return true;
         }
@@ -79,11 +80,23 @@ public:
         return;
     }
 
+    int countNodeDelete(Node* root) {
+        if(!root) return 0;
+        if(!root->firstChild) return 1;
+        Node* temp = root->firstChild;
+        int res=1;
+        while(temp) {
+            res += countNodeDelete(temp);
+            temp->nextSibling;
+        }
+        return res;
+    }
     // Delete a Node with value data into a linkedlist
-    void removeInSortedLinkedList( Node* head, int data) {
+    int removeInSortedLinkedList( Node* head, int data) {
         Node* temp = head;
-        while(temp->nextSibling.data < data) temp = temp->nextSibling;
+        while(temp->nextSibling->data < data) temp = temp->nextSibling;
         // Node* pointer = temp->nextSibling;
+        int res = countNodeDelete(temp->nextSibling);
         temp->nextSibling = temp->nextSibling->nextSibling;
         // delete all Nodes
         // deleteNode(pointer);
@@ -93,19 +106,18 @@ public:
     int remove(int data) {
         Node* temp = findNode(root,data);
         if (temp == NULL) return 0;
-        removeInSortedLinkedList(temp->fatherNode->firstChild,data);
-        return 0;
+        return removeInSortedLinkedList(temp->fatherNode->firstChild,data);
     }
 
     // Preorder traversal
     void preorder( Node* root) {
         if(!root) return;
-        cout << root.data << " ";
+        cout << root->data << " ";
         if(root->nextSibling != NULL) {
             Node* temp = root->nextSibling;
             while(temp) {
                 preorder(temp);
-                temp = temp->next;
+                temp = temp->nextSibling;
             }
         }
     }
@@ -117,10 +129,10 @@ public:
             Node* temp = root->nextSibling;
             while(temp) {
                 preorder(temp);
-                temp = temp->next;
+                temp = temp->nextSibling;
             }
         }
-        cout << root.data << " ";
+        cout << root->data << " ";
 
     }
 
@@ -145,49 +157,102 @@ public:
         else return isBinaryTree(root->firstChild) && isBinaryTree(root->firstChild->nextSibling); 
     }
 
-    // Hàm kiểm tra cây tìm kiếm nhị phân
     bool isBinarySearchTree();
 
-    // Hàm kiểm tra cây max-heap
     bool isMaxHeapTree();
 
-    // Hàm in ra các Node theo thứ tự inorder nếu là cây nhị phân
     void inorder( Node* root) {
         if(!root) return;
         if (isBinaryTree(root)) {
             Node* temp = root->firstChild;
             inorder(temp);
-            cout << root.data << " ";
+            cout << root->data << " ";
             inorder(temp->nextSibling);               
         }
     }
 
-    // Hàm trả về độ cao của cây
-    int height() {
+    int height(Node* root) {
         if (!root) return 0;
-        
+        Node* temp = root->firstChild;
+        int h = height(temp);
+        temp = temp->nextSibling;
+        while(temp) {
+            int x = height(temp);
+            h = h > x ? h : x;
+            temp = temp->nextSibling;
+        }
     }
 
-    // Hàm trả về độ sâu của một Node
-    int depth(int data);
+    int depth(int data) {
+        Node* temp = findNode(this->root,data);
+        int count=0;
+        while(temp != this->root) {
+            count++;
+            temp = temp->fatherNode;
+        }
+        return count;
+    }
 
-    // Hàm đếm số lượng lá
-    int numOfLeaves();
+    int numOfLeaves(Node* root) {
+        if(!root->firstChild) return 1;
+        int sum=0;
+        Node* temp = root->firstChild;
+        while(temp) {
+            sum += numOfLeaves(temp);
+            temp = temp->nextSibling;
+        }
+        return sum;
+    }
 
-    // Hàm trả về Node có giá trị lớn nhất
-    int findMax();
+    int findMax(Node* root, int max) {
+        if(!root->firstChild) {
+            return (root->data > max) ? root->data : max;
+        }
+        Node* temp = root->firstChild;
+        while(temp) {
+            max = findMax(temp,max);
+            temp = temp->nextSibling;
+        }
+        return max;       
+    }
 
-    // Hàm trả về Node có nhiều con nhất
-    int findMaxChild();
+    int findMaxChild() {
+
+    }
 };
 
 int main(int argc, char const *argv[]) {
-    // Tạo ra một cây ngẫu nhiên có tối thiểu 30 Node
-    // Test thử các hàm của lớp cây
-
-    // Tạo ra một cây thoả mãn tính chất là Binary Search Tree và test lại
-    
-    // Tạo ra một cây thoả mãn tính chất là Max Heap Tree và test lại
+	Tree* tree = new Tree();
+	tree->insert(0,1);
+	tree->insert(1,3);
+	tree->insert(1,2);
+	tree->insert(1,4);
+	tree->insert(1,5);
+	tree->insert(3,19);
+	tree->insert(3,25);
+	tree->insert(3,9);
+	tree->insert(2,12);
+	tree->insert(2,13);
+	tree->insert(2,14);
+	tree->insert(2,15);
+	tree->insert(4,99);
+	tree->insert(4,95);
+	tree->insert(4,43);
+	tree->insert(5,55);
+//	tree.insert(5,59);
+//	tree.insert(19,1);
+//	tree.insert(19,1);
+//	tree.insert(25,1);
+//	tree.insert(9,1);
+//	tree.insert(12,1);
+//	tree.insert(13,1);
+//	tree.insert(13,1);
+//	tree.insert(14,1);
+//	tree.insert(15,1);
+//	tree.insert(99,1);
+//	tree.insert(43,1);
+//	tree.insert(55,1);
+//	tree.insert(59,1);
     return 0;
 }
 
