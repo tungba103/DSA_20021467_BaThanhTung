@@ -19,6 +19,10 @@ vector<int> Atm2(vector<int> a, int money) {
 		count =0;
 		st.pop();
 	}
+	if(money >0) {
+		cout << "Khong co cach lay thoa man" << endl;
+		return result;
+	}
 	while(!res.empty()) {
 		result.push_back(res.top());
 		res.pop();
