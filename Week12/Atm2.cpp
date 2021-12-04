@@ -4,41 +4,28 @@
 #include <map>
 using namespace std;
 
-vector<int> Atm2(vector<int> a, int money) {
-	vector<int> result;
-	stack<int> st,res;
-	for(int i=0 ; i< a.size() ; i++) st.push(a[i]);
-	while( money > 0) {
-		int count =0;
-		while(money > money > st.top() && a[st.size()-1] > 0) {
-			money = money - st.top();
-			a[st.size()-1]--;
-			count++;
-		}
-		res.push(count);
-		count =0;
-		st.pop();
-	}
-	if(money >0) {
-		cout << "Khong co cach lay thoa man" << endl;
-		return result;
-	}
-	while(!res.empty()) {
-		result.push_back(res.top());
-		res.pop();
-	}
-	return result;
+vector<int> Atm2(int a[], int money) {
+    int res[8] = {0};
+    int m[] = {1000,2000,5000,10000,50000,100000,200000,500000};
+    for( int i = 7 ; i >=0 ; i--) {
+        res[i] = min(money/m[i],a[i]);
+        m -= m[i] * res[i];
+    }
+    return res;
 }
 
 int main() {
-	// 700000 6 1 1 1 1 1 1  
+	// 700000 6 1 1 1 1 1 1 1 1 1
 	int money,n,x;
-	vector<int> a;
-	cin >> money >> n;
-	for(int i=0 ; i< n ; i++)
+	int a[],b[8];
+	string str[] = {"So to 500000 la ","So to 200000 la ","So to 100000 la ","So to 50000 la ","So to 20000 la ","So to 10000 la ","So to 5000 la ","So to 2000 la ","So to 1000 la "};
+	cin >> money;
+	for(int i= 7 ; i >= 0 ; i--)
 		{
-			cin >> x;
-			a.push_back(x);
+		    cout << str[i];
+			cin >> a[7-i];
 		}
-	vector<int> result = Atm2(a,money);
+	 b = Atm2(a,money);
+	 for(int i=0 ; i< 8 ; i++)
+        cout << str[7-i] << " " b << endl;
 }
